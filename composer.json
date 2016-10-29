@@ -2,7 +2,6 @@
     "name": "sunnysideup/user_image_upload",
     "type": "silverstripe-module",
     "description": "allow users to upload images to a gallery or similar",
-
     "license": "Sunny Side Up (BSD-3-Clause and CUSTOM)",
     "authors": [
         {
@@ -12,9 +11,15 @@
         }
     ],
     "require": {
-        "silverstripe/framework": "~2.4"
+        "silverstripe/framework": "~2.4",
+        "silverstripe/cms": "~2.4"
     },
     "extra": {
         "installer-name": "user_image_upload"
-    }
+    },
+    "keywords": [
+        "Silverstripe-CMS",
+        "CMS",
+        "Silverstripe"
+    ]
 }

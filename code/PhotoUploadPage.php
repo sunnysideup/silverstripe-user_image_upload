@@ -1,7 +1,7 @@
 <?php
 
-class PhotoUploadPage extends Page {
-
+class PhotoUploadPage extends Page
+{
     private static $icon = 'mysite/images/treeicons/PhotoUploadPage';
 
     private static $db = array(
@@ -29,7 +29,8 @@ class PhotoUploadPage extends Page {
         "NumberOfImages" => 1
     );
 
-    function getCMSFields() {
+    public function getCMSFields()
+    {
         $fields = parent::getCMSFields();
 
         //invite section
@@ -76,35 +77,33 @@ class PhotoUploadPage extends Page {
         return $fields;
     }
 
-    function requireDefaultRecords(){
+    public function requireDefaultRecords()
+    {
         parent::requireDefaultRecords();
         $pages = PhotoUploadPage::get();
-        foreach($pages as $page) {
+        foreach ($pages as $page) {
             $write = false;
-            if(strlen($page->InvitationMessage) < 20) {
+            if (strlen($page->InvitationMessage) < 20) {
                 $write = true;
                 $page->InvitationMessage = '
         <p>
             Invite message
         </p>';
             }
-            if(!$page->InviteButtonText) {
+            if (!$page->InviteButtonText) {
                 $write = true;
                 $page->InviteButtonText = 'Upload Now';
             }
-            if($write) {
+            if ($write) {
                 $page->writeToStage();
                 $page->publish("Stage", "Live");
             }
         }
-
     }
-
-
 }
 
-class PhotoUploadPage_Controller extends Page_Controller {
-
+class PhotoUploadPage_Controller extends Page_Controller
+{
     private static $allowed_actions = array(
         "thankyou",
         "deleteimage",
@@ -120,22 +119,25 @@ class PhotoUploadPage_Controller extends Page_Controller {
 
     private $productID = 0;
 
-    function init() {
+    public function init()
+    {
         parent::init();
         $this->productID = intval($this->request->param("ID"));
     }
 
 
-    function ajaxform(){
+    public function ajaxform()
+    {
         return $this->renderWith("PhotoUploadPage_Ajax");
     }
 
-    function Form() {
+    public function Form()
+    {
         $settings = $this->dataRecord;
         $requiredFields = new RequiredFields('Image1');
         $fields = new FieldList();
         $required = ' <span class="required">*</span>';
-        if($this->UploadExplanation) {
+        if ($this->UploadExplanation) {
             $fields->push(new LiteralField('UploadExplanation', $this->UploadExplanation));
         }
         $fields->push(new TextField('FirstName', 'Your First Name'));
@@ -147,12 +149,11 @@ class PhotoUploadPage_Controller extends Page_Controller {
         //spam field
         $fields->push(new TextField('Website', "Website"));
         $product = Product::get()->byID($this->productID);
-        if($product) {
+        if ($product) {
             $variations = ProductVariation::get()->filter(array("ProductID" => $product->ID))->map("ID", "Title")->toArray();
             $productDropdown = new HiddenField('ProductPageID', "Hidden Product", $product->ID);
             $variationsDropdown = new DropdownField('ProductVariationID', 'Model', $variations);
-        }
-        else {
+        } else {
             $products = Product::get()->map("ID", "Title")->toArray();
             $productDropdown = new DropdownField('ProductPageID', 'Product', $products);
             $variationsDropdown = new HiddenField('ProductVariationID', 0, 0);
@@ -164,10 +165,10 @@ class PhotoUploadPage_Controller extends Page_Controller {
         $feedbackField->setRows(5);
         $fields->push($feedbackField);
 
-        for($i = 1; ($i <= $this->NumberOfImages || $i == 1) && $i < 6; $i++) {
+        for ($i = 1; ($i <= $this->NumberOfImages || $i == 1) && $i < 6; $i++) {
             $fields->push($field = new FileField("Image$i", ($i == 1 ? "Your Photo$required" : "Photo $i")));
             $field->setFolderName('Customer-Photos/Drafts');
-            $field->getValidator()->setAllowedExtensions(array('jpg','gif','png'));
+            $field->getValidator()->setAllowedExtensions(array('jpg', 'gif', 'png'));
         }
         //final cleanup
         $requiredFields->addRequiredField('Image1');
@@ -180,17 +181,18 @@ class PhotoUploadPage_Controller extends Page_Controller {
         return $form;
     }
 
-    function upload($data, $form) {
+    public function upload($data, $form)
+    {
         //check for spam
-        if(isset($data["Website"]) && $data["Website"]) {
+        if (isset($data["Website"]) && $data["Website"]) {
             $form->sessionMessage('Please dont be overzealous.', 'bad');
             $this->redirectBack();
         }
-        if(!isset($data['Email'])) {
+        if (!isset($data['Email'])) {
             $form->sessionMessage('Please fill in "Email", it is required.', 'bad');
             return $this->redirectBack();
         }
-        if(!isset($data['Feedback'])) {
+        if (!isset($data['Feedback'])) {
             $data['Feedback'] = 'NO FEEDBACK PROVIDED';
         }
         $customerImage = CustomerImage::create();
@@ -203,23 +205,22 @@ class PhotoUploadPage_Controller extends Page_Controller {
 
     private $isThankYouContent = false;
 
-    public function IsThankYouContent(){
+    public function IsThankYouContent()
+    {
         return $this->isThankYouContent;
     }
 
-    function thankyou() {
+    public function thankyou()
+    {
         $this->isThankYouContent = true;
         $this->Title = $this->ThankYouTitle;
         $this->MetaTitle = $this->ThankYouTitle;
-        if(Director::is_ajax()) {
+        if (Director::is_ajax()) {
             return $this->renderWith("PhotoUploadPage_Ajax");
-        }
-        else {
+        } else {
             return array();
         }
     }
-
-
 }
 /*
 class PhotoUploadPage_Uploader extends UploadField {
